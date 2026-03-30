@@ -1,144 +1,205 @@
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <title>Realtime Chat UI</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat Message</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Arial, sans-serif;
+  }
 
-    body {
-      background: #0f172a;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #0f172a; /* dark background */
+  }
 
+  .chat-container {
+    width: 100%;
+    max-width: 480px;
+    height: 90vh;
+    background: #1e293b; /* dark card */
+    display: flex;
+    flex-direction: column;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Header */
+  .chat-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #020617;
+    padding: 12px 15px;
+    border-bottom: 1px solid #1e293b;
+  }
+
+  .chat-header img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+
+  .chat-header .info {
+    flex: 1;
+  }
+
+  .chat-header h3 {
+    font-size: 16px;
+    color: #f1f5f9;
+  }
+
+  .chat-header span {
+    font-size: 12px;
+    color: #22c55e; /* green online */
+  }
+
+  /* Messages area */
+  .chat-messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+  }
+
+  .message {
+    max-width: 75%;
+    margin-bottom: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.4;
+    word-wrap: break-word;
+  }
+
+  .message.sent {
+    background: #22c55e; /* green */
+    color: #022c22;
+    margin-left: auto;
+    border-top-right-radius: 0;
+  }
+
+  .message.received {
+    background: #334155;
+    color: #e2e8f0;
+    margin-right: auto;
+    border-top-left-radius: 0;
+  }
+
+  .timestamp {
+    display: block;
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 3px;
+    text-align: right;
+  }
+
+  /* Input area */
+  .chat-input {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background: #020617;
+    border-top: 1px solid #1e293b;
+  }
+
+  .chat-input input {
+    flex: 1;
+    padding: 10px 15px;
+    border-radius: 20px;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    background: #1e293b;
+    color: #f1f5f9;
+  }
+
+  .chat-input input::placeholder {
+    color: #64748b;
+  }
+
+  .chat-input button {
+    margin-left: 10px;
+    background: #22c55e;
+    border: none;
+    color: #022c22;
+    padding: 10px 14px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 16px;
+  }
+
+  .chat-input button:hover {
+    background: #16a34a;
+    transform: scale(1.05);
+  }
+
+  .sender-name {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 4px;
+    text-align: right;
+    font-style: italic;
+  }
+
+  .message.received .sender-name {
+    text-align: left;
+    color: #cbd5f5;
+    font-weight: 500;
+  }
+
+  /* Responsive */
+  @media (max-width: 500px) {
     .chat-container {
-      width: 400px;
-      height: 600px;
-      background: #1e293b;
-      border-radius: 12px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      height: 100vh;
+      border-radius: 0;
     }
+  }
+</style>
 
-    .chat-header {
-      padding: 15px;
-      background: #334155;
-      color: white;
-      font-weight: bold;
-      text-align: center;
-    }
-
-    .chat-messages {
-      flex: 1;
-      padding: 15px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .message {
-      max-width: 70%;
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-size: 14px;
-    }
-
-    .message.user1 {
-      align-self: flex-start;
-      background: #475569;
-      color: white;
-    }
-
-    .message.user2 {
-      align-self: flex-end;
-      background: #22c55e;
-      color: white;
-    }
-
-    .username {
-      font-size: 11px;
-      opacity: 0.7;
-      margin-bottom: 3px;
-    }
-
-    .chat-input {
-      display: flex;
-      padding: 10px;
-      background: #334155;
-    }
-
-    .chat-input input {
-      flex: 1;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      outline: none;
-    }
-
-    .chat-input button {
-      margin-left: 10px;
-      padding: 10px 15px;
-      background: #22c55e;
-      border: none;
-      border-radius: 8px;
-      color: white;
-      cursor: pointer;
-    }
-
-    .chat-input button:hover {
-      background: #16a34a;
-    }
-  </style>
-</head>
 <body>
-
   <div class="chat-container">
-    
+    <!-- Header -->
     <div class="chat-header">
-      Group Chat Room
+      <img src="https://i.pravatar.cc/100?img=1" alt="User" />
+      <div class="info">
+        <h3>Friends Group</h3>
+        <span id="online">0 Online</span>
+      </div>
     </div>
 
-    <div class="chat-messages">
-      
-      <div class="message user1">
-        <div class="username">User A</div>
-        Hello bro 👋
-      </div>
-
-      <div class="message user2">
-        <div class="username">User B</div>
-        Hey! What's up?
-      </div>
-
-      <div class="message user1">
-        <div class="username">User A</div>
-        Building realtime chat 🚀
-      </div>
-
-      <div class="message user2">
-        <div class="username">User B</div>
-        Nice 🔥
-      </div>
-
+    <!-- Messages -->
+    <div id="chat-messages" class="chat-messages">
     </div>
 
+    <!-- Input -->
     <div class="chat-input">
-      <input type="text" placeholder="Type a message..." />
-      <button>Send</button>
+      <input type="text" id="msg" placeholder="Type a message..." />
+      <button type="button" onclick="sendMessage()">➤</button>
     </div>
-
   </div>
 
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+
+  <script>
+
+    const name=prompt("Enter Your Name Bro");
+const socket = io("http://localhost:4000",{query:{name:name}});
+socket.on('connect',(data)=>{
+
+})
+  </script>
+  
 </body>
+
 </html>
