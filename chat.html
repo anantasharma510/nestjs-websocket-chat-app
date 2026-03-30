@@ -168,38 +168,82 @@
 </style>
 
 <body>
-  <div class="chat-container">
-    <!-- Header -->
-    <div class="chat-header">
-      <img src="https://i.pravatar.cc/100?img=1" alt="User" />
-      <div class="info">
-        <h3>Friends Group</h3>
-        <span id="online">0 Online</span>
-      </div>
-    </div>
 
-    <!-- Messages -->
-    <div id="chat-messages" class="chat-messages">
-    </div>
-
-    <!-- Input -->
-    <div class="chat-input">
-      <input type="text" id="msg" placeholder="Type a message..." />
-      <button type="button" onclick="sendMessage()">➤</button>
+<div class="chat-container">
+  <div class="chat-header">
+    <img src="https://i.pravatar.cc/100?img=1" alt="User" />
+    <div class="info">
+      <h3>Friends Group</h3>
+      <span id="online">0 Online</span>
     </div>
   </div>
 
-  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  <div id="chat-messages" class="chat-messages"></div>
 
-  <script>
+  <div class="chat-input">
+    <input type="text" id="msg" placeholder="Type a message..." />
+    <button type="button" onclick="sendMessage()">➤</button>
+  </div>
+</div>
 
-    const name=prompt("Enter Your Name Bro");
-const socket = io("http://localhost:4000",{query:{name:name}});
-socket.on('connect',(data)=>{
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+<script>
+let name;
+while (!name) {
+  name = prompt("Enter your name to join the chat");
+}
+name = name.trim();
 
-})
-  </script>
-  
+const socket = io("http://localhost:4000", { query: { name } });
+const chatMessages = document.getElementById("chat-messages");
+const onlineSpan = document.getElementById("online");
+
+// Add message to chat
+function addMessage(msg, sender) {
+  const div = document.createElement("div");
+  div.classList.add("message");
+
+  if (sender === name || sender === "You") {
+    div.classList.add("sent");
+    div.innerHTML = `<strong>${sender}:</strong> ${msg}<span class="timestamp">${new Date().toLocaleTimeString()}</span>`;
+  } else if (sender === "System") {
+    div.classList.add("received");
+    div.innerHTML = `<em>${msg}</em><span class="timestamp">${new Date().toLocaleTimeString()}</span>`;
+  } else {
+    div.classList.add("received");
+    div.innerHTML = `<strong>${sender}:</strong> ${msg}<span class="timestamp">${new Date().toLocaleTimeString()}</span>`;
+  }
+
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Send message
+function sendMessage() {
+  const input = document.getElementById("msg");
+  const message = input.value.trim();
+  if (!message) return;
+
+  addMessage(message, "You");
+  socket.emit("message", message);
+  input.value = "";
+}
+
+// Listen to backend
+socket.on("conversation", ({ name: sender, message }) => addMessage(message, sender));
+socket.on("user-joined", ({ name: userName, message }) => addMessage(message, "System"));
+socket.on("user-left", message => addMessage(message, "System"));
+
+// Update online count
+socket.on("online-count", count => {
+  onlineSpan.textContent = `${count} Online`;
+});
+
+// Connection message
+socket.on("connect", () => {
+  addMessage(`You connected as ${name}`, "System");
+});
+</script>
 </body>
 
-</html>
+</html>yo
